@@ -329,7 +329,7 @@ def evaluate(model, loader):
 
 # --- 4. CNN Training & Evaluation ---
 WEIGHTS_DIR = "weights"
-WEIGHTS_FILE = os.path.join(WEIGHTS_DIR, "best_model_weights.pth")
+WEIGHTS_FILE = os.path.join(WEIGHTS_DIR, "cnn_model_weights.pth")
 os.makedirs(WEIGHTS_DIR, exist_ok=True) 
 
 needs_training = True
