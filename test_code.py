@@ -25,6 +25,10 @@ class BreastCancerDataset(Dataset):
         std=None,
         max_stats_samples=None,
         print_stats=True,
+        augment=False,
+        hflip_p=0.5,
+        rotation_degrees=15,
+        color_jitter_params=None,  # e.g. {"brightness":0.1,"contrast":0.1}
     ):
         """
         root_dir:           path to class subfolders (e.g. ./BreaKHis_400X/train)
@@ -33,6 +37,12 @@ class BreastCancerDataset(Dataset):
         mean, std:          optional precomputed mean/std (lists or tensors of len 3)
         max_stats_samples:  limit number of images for stats (None = all)
         print_stats:        if True, print stats after computing (for mean/std)
+        augment:            if True, apply RandomHorizontalFlip / RandomRotation / ColorJitter
+                            (typically True for train, False for test)
+        hflip_p:            probability for RandomHorizontalFlip
+        rotation_degrees:   max degrees for RandomRotation (±degrees)
+        color_jitter_params: dict passed to ColorJitter, e.g.
+                             {"brightness":0.1, "contrast":0.1, "saturation":0.1, "hue":0.05}
         """
         self.img_paths = []
         self.labels = []
@@ -49,15 +59,20 @@ class BreastCancerDataset(Dataset):
             self.labels.extend([i] * len(imgs))
 
         self.resize = resize
+        self.augment = augment
+        self.hflip_p = hflip_p
+        self.rotation_degrees = rotation_degrees
+        self.color_jitter_params = color_jitter_params
 
-        # Base transform for "input" stats: Resize + ToTensor (no Normalize)
+        # ---------- base tfms (for stats) ----------
+        # Resize + ToTensor, no Normalize, no augment
         self._base_tfms = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize(self.resize),
             transforms.ToTensor(),  # --> [0,1]
         ])
 
-        # Decide mean/std for normalization
+        # ---------- decide mean/std for normalization ----------
         if compute_stats:
             self.mean, self.std = self._compute_mean_std(
                 max_samples=max_stats_samples,
@@ -71,13 +86,33 @@ class BreastCancerDataset(Dataset):
             self.mean = torch.tensor(mean, dtype=torch.float32)
             self.std = torch.tensor(std, dtype=torch.float32)
 
-        # Final transform: Resize -> ToTensor -> Normalize(dataset_mean, dataset_std)
-        self.transform = transforms.Compose([
+        # ---------- build full transform pipeline ----------
+        # 1) PIL transforms: Resize + (optional augmentations)
+        tfms_list = [
             transforms.ToPILImage(),
             transforms.Resize(self.resize),
+        ]
+
+        if self.augment:
+            # Random horizontal flip
+            if self.hflip_p and self.hflip_p > 0.0:
+                tfms_list.append(transforms.RandomHorizontalFlip(p=self.hflip_p))
+            # Random rotation
+            if self.rotation_degrees and self.rotation_degrees > 0:
+                tfms_list.append(transforms.RandomRotation(self.rotation_degrees))
+            # Color jitter
+            if self.color_jitter_params is not None:
+                tfms_list.append(
+                    transforms.ColorJitter(**self.color_jitter_params)
+                )
+
+        # 2) ToTensor + Normalize
+        tfms_list.extend([
             transforms.ToTensor(),
             transforms.Normalize(mean=self.mean.tolist(), std=self.std.tolist()),
         ])
+
+        self.transform = transforms.Compose(tfms_list)
 
     def __len__(self):
         return len(self.img_paths)
@@ -92,7 +127,8 @@ class BreastCancerDataset(Dataset):
     def _compute_mean_std(self, max_samples=None, print_stats=True):
         """
         Compute per-channel mean and std in [0,1] on resized images
-        using self._base_tfms (Resize + ToTensor), i.e. BEFORE Normalize.
+        using self._base_tfms (Resize + ToTensor), i.e. BEFORE Normalize
+        and WITHOUT augmentations.
         """
         n_total = len(self.img_paths)
         n_use = n_total if max_samples is None else min(max_samples, n_total)
@@ -128,17 +164,12 @@ class BreastCancerDataset(Dataset):
     def compute_input_and_normalized_stats(self, max_samples=None, print_stats=True):
         """
         Compute per-channel (R,G,B) min, max, mean for:
-          - 'input'   : after Resize+ToTensor (self._base_tfms), in [0,1]
-          - 'normalized': after full self.transform (includes Normalize)
+          - 'input'      : after Resize+ToTensor (self._base_tfms), in [0,1]
+          - 'normalized' : after full self.transform (may include augmentations
+                           if self.augment=True)
 
         max_samples:   number of images to use (None = all)
         print_stats:   if True, print results
-
-        Returns:
-            {
-              "input":      {"min": [..], "max": [..], "mean": [..]},
-              "normalized": {"min": [..], "max": [..], "mean": [..]},
-            }
         """
         n_total = len(self.img_paths)
         n_use = n_total if max_samples is None else min(max_samples, n_total)
@@ -163,15 +194,15 @@ class BreastCancerDataset(Dataset):
             img = cv2.imread(p)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-            # ----- input (pre-normalization) -----
+            # ----- input (pre-normalization, no augment) -----
             inp = self._base_tfms(img)  # [C,H,W], in [0,1]
             in_min = torch.minimum(in_min, inp.amin(dim=[1, 2]).double())
             in_max = torch.maximum(in_max, inp.amax(dim=[1, 2]).double())
             in_sum += inp.sum(dim=[1, 2]).double()
             in_count += inp.shape[1] * inp.shape[2]
 
-            # ----- normalized (post-normalization) -----
-            out = self.transform(img)   # [C,H,W], normalized
+            # ----- normalized (post-transform; may include augment) -----
+            out = self.transform(img)   # [C,H,W]
             norm_min = torch.minimum(norm_min, out.amin(dim=[1, 2]).double())
             norm_max = torch.maximum(norm_max, out.amax(dim=[1, 2]).double())
             norm_sum += out.sum(dim=[1, 2]).double()
@@ -208,23 +239,163 @@ class BreastCancerDataset(Dataset):
         return stats
 
 class SimpleCNN(nn.Module):
-    def __init__(self, num_classes=2):
+    """
+    A small but modern CNN:
+    - Conv + BatchNorm + ReLU blocks
+    - Downsampling via MaxPool
+    - Global average pooling to avoid giant fully-connected layers
+    """
+    def __init__(self, num_classes=2, base_channels=32, dropout_p=0.5):
         super().__init__()
-        self.conv = nn.Sequential(
-            nn.Conv2d(3, 32, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2),
-            nn.Conv2d(32, 64, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2),
-            nn.Conv2d(64, 128, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2),
+
+        # 224x224 -> 112x112
+        self.block1 = nn.Sequential(
+            nn.Conv2d(3, base_channels, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(base_channels),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2)  # /2
         )
-        self.fc = nn.Sequential(
-            nn.Linear(128*28*28, 256), nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(256, num_classes)
+
+        # 112x112 -> 56x56
+        self.block2 = nn.Sequential(
+            nn.Conv2d(base_channels, base_channels * 2, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(base_channels * 2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2)  # /2
+        )
+
+        # 56x56 -> 28x28
+        self.block3 = nn.Sequential(
+            nn.Conv2d(base_channels * 2, base_channels * 4, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(base_channels * 4),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2)  # /2
+        )
+
+        # Optional extra conv (no further downsample)
+        self.block4 = nn.Sequential(
+            nn.Conv2d(base_channels * 4, base_channels * 4, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(base_channels * 4),
+            nn.ReLU(inplace=True),
+        )
+
+        # Global average pooling -> [B, C, 1, 1]
+        self.global_pool = nn.AdaptiveAvgPool2d((1, 1))
+
+        # Very small classifier: C -> num_classes
+        # the Dropout here should not be deleted, otherwise the test loss will have higher variability
+        self.classifier = nn.Sequential(
+            nn.Dropout(dropout_p),
+            nn.Linear(base_channels * 4, num_classes)
         )
 
     def forward(self, x):
-        x = self.conv(x)
+        x = self.block1(x)   # [B, C, 112,112]
+        x = self.block2(x)   # [B, 2C, 56,56]
+        x = self.block3(x)   # [B, 4C, 28,28]
+        x = self.block4(x)   # [B, 4C, 28,28]
+        x = self.global_pool(x)  # [B, 4C, 1,1]
+        x = x.view(x.size(0), -1)  # [B, 4C]
+        x = self.classifier(x)     # [B, num_classes]
+        return x
+
+class SimpleCNN_Advanced(nn.Module):
+    def __init__(
+        self,
+        num_classes: int = 2,
+        base_channels: int = 32,
+        dropout_p: float = 0.2,
+    ):
+        super().__init__()
+
+        # 224x224 -> 112x112, 3 -> base_channels
+        self.block1 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=3,
+                out_channels=base_channels,
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.BatchNorm2d(base_channels),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        # 112x112 -> 32x32 -> 16x16, base_channels -> 2*base_channels
+        self.block2 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=base_channels,
+                out_channels=base_channels,
+                kernel_size=19,
+                stride=3,
+                padding=0,
+                bias=False,
+            ),
+            nn.BatchNorm2d(base_channels),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        # Global average pooling -> [B, 2*base_channels, 1, 1]
+        self.global_pool = nn.AdaptiveAvgPool2d((1, 1))
+
+        feat_dim = base_channels  # here 64 if base_channels=32
+
+        # Classifier: Dropout + Linear(feat_dim -> num_classes)
+        self.classifier = nn.Sequential(
+            nn.Dropout(dropout_p),
+            nn.Linear(feat_dim, num_classes),
+        )
+
+    def forward(self, x):
+        x = self.block1(x)       # [B, base_channels, 112, 112]
+        x = self.block2(x)       # [B, 2*base_channels, 16, 16]
+        x = self.global_pool(x)  # [B, 2*base_channels, 1, 1]
+        x = torch.flatten(x, 1)  # [B, 2*base_channels]
+        x = self.classifier(x)   # [B, num_classes]
+        return x
+
+class SimpleCNN_Advanced2(nn.Module):
+    def __init__(self, num_classes=2, base_channels=32, dropout_p=0.5):
+        super().__init__()
+
+        self.block1 = nn.Sequential(
+            nn.Conv2d(3, base_channels, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(base_channels),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2)
+        )
+
+        self.block2 = nn.Sequential(
+            nn.Conv2d(base_channels, base_channels * 2, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(base_channels * 2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2)
+        )
+
+        self.block3 = nn.Sequential(
+            nn.Conv2d(base_channels * 2, base_channels * 4, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(base_channels * 4),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2)
+        )
+
+        self.global_pool = nn.AdaptiveAvgPool2d((1, 1))
+
+        self.classifier = nn.Sequential(
+            nn.Dropout(dropout_p),
+            nn.Linear(base_channels * 4, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.block1(x)
+        x = self.block2(x)
+        x = self.block3(x)
+        x = self.global_pool(x)
         x = x.view(x.size(0), -1)
-        return self.fc(x)
+        return self.classifier(x)
 
 class VGGInspired(nn.Module):
     def __init__(self, num_classes=2):
@@ -249,14 +420,100 @@ class VGGInspired(nn.Module):
         return self.classifier(self.features(x))
 
 class ResNetLike(nn.Module):
-    def __init__(self, num_classes=2):
+    def __init__(
+        self,
+        num_classes: int = 2,
+        freeze_backbone: bool = True,
+        mlp_hidden: int | None = None,
+        dropout_p: float = 0.5,
+    ):
         super().__init__()
-        base = models.resnet18(weights=None)
-        base.fc = nn.Linear(base.fc.in_features, num_classes)
-        self.model = base
+
+        # 1. Load pretrained ResNet-50
+        try:
+            base = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
+        except AttributeError:
+            base = models.resnet50(pretrained=True)
+
+        # 2. Extract the backbone up to (but not including) the original fc
+        #    children(): [conv1, bn1, relu, maxpool, layer1, layer2, layer3, layer4, avgpool, fc]
+        modules = list(base.children())
+        self.backbone = nn.Sequential(*modules[:-1])  # everything except the last fc
+
+        # 3. Feature dimension after global avgpool
+        # base.fc.in_features is the dim of flattened feature after avgpool
+        feat_dim = base.fc.in_features  # usually 2048 for resnet50
+
+        # 4. Define your classifier head (MLP)
+        if mlp_hidden is None:
+            # simplest possible: just a linear layer 2048 -> num_classes
+            self.classifier = nn.Sequential(
+                nn.Dropout(dropout_p),
+                nn.Linear(feat_dim, num_classes)
+            )
+        else:
+            self.classifier = nn.Sequential(
+                nn.Linear(feat_dim, mlp_hidden),
+                nn.ReLU(inplace=True),
+                nn.Dropout(dropout_p),
+                nn.Linear(mlp_hidden, num_classes),
+            )
+
+        # 5. Optionally freeze backbone parameters
+        if freeze_backbone:
+            for param in self.backbone.parameters():
+                param.requires_grad = False
+
+        # Make sure head is trainable
+        for param in self.classifier.parameters():
+            param.requires_grad = True
 
     def forward(self, x):
-        return self.model(x)
+        # Backbone: convs + avgpool -> [B, C, 1, 1]
+        x = self.backbone(x)            # shape [B, 2048, 1, 1] for resnet50
+        x = torch.flatten(x, 1)         # [B, 2048]
+        # Head: your MLP
+        x = self.classifier(x)          # [B, num_classes]
+        return x
+
+def build_model(
+    model_name: str,
+    num_classes: int,
+    train_new: bool,
+    weight_path: str | None = None,
+):
+    """
+    Create a model of the given type.
+    If train_new is False, initialize from weight_path instead of random weights.
+    Does NOT run training.
+    """
+    # 1) Instantiate architecture
+    if model_name == 'SimpleCNN':
+        model = SimpleCNN(num_classes=num_classes)
+    elif model_name == 'VGGInspired':
+        model = VGGInspired(num_classes=num_classes)
+    elif model_name == 'ResNetLike':
+        model = ResNetLike(num_classes=num_classes)
+    elif model_name == 'SimpleCNN_Advanced':
+        model = SimpleCNN_Advanced(num_classes=num_classes)
+    elif model_name == 'SimpleCNN_Advanced2':
+        model = SimpleCNN_Advanced2(num_classes=num_classes)
+    else:
+        raise ValueError(f"Unknown model_name: {model_name}")
+
+    # 2) Optionally load weights
+    if not train_new:
+        if weight_path is None:
+            raise ValueError("weight_path must be provided when train_new=False.")
+        if not os.path.exists(weight_path):
+            raise FileNotFoundError(f"Weight file not found: {weight_path}")
+        state = torch.load(weight_path, map_location=device)
+        model.load_state_dict(state)
+        print(f"✅ Loaded weights from {weight_path}")
+    else:
+        print(f"✅ Initialized new {model_name} with random weights")
+
+    return model.to(device)
 
 def train_model(
     model,
@@ -264,6 +521,7 @@ def train_model(
     val_loader,
     epochs: int = 10,
     lr: float = 1e-4,
+    criterion=None,
     save_dir: str | None = None,
     save_prefix: str | None = None,
     save_every: int | None = None,
@@ -289,8 +547,9 @@ def train_model(
         val_losses:   list of validation loss (per epoch)
     """
     model = model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+    if criterion is None:
+        criterion = nn.CrossEntropyLoss()
 
     train_losses, val_losses = [], []
 
@@ -341,8 +600,8 @@ def train_model(
         print(
             f"Epoch {epoch+1} | "
             f"Train Loss: {avg_train_loss:.4f} | "
-            f"Val Loss: {avg_val_loss:.4f} | "
-            f"Val Acc: {val_acc:.4f}"
+            f"Test Loss: {avg_val_loss:.4f} | "
+            f"Test Acc: {val_acc:.4f}"
         )
 
         # ----- Save checkpoint if requested -----
@@ -484,10 +743,10 @@ def plot_curves(train_losses, val_losses, model_name=None, epoch=None, save=True
     plt.figure(figsize=(8, 6))
     epochs = np.arange(1, len(train_losses) + 1)
     plt.plot(epochs, train_losses, label='Training Loss', color='#1f77b4', linewidth=2, marker='o', markersize=4)
-    plt.plot(epochs, val_losses, label='Validation Loss', color='#ff7f0e', linewidth=2, marker='s', markersize=4)
+    plt.plot(epochs, val_losses, label='Test Loss', color='#ff7f0e', linewidth=2, marker='s', markersize=4)
     plt.xlabel('Epoch', fontsize=14)
     plt.ylabel('Loss', fontsize=14)
-    plt.title('Training and Validation Loss Curves', fontsize=16, pad=12, weight='bold')
+    plt.title('Training and Test Loss Curves', fontsize=16, pad=12, weight='bold')
     plt.legend(loc='best', fontsize=12, frameon=True, shadow=True)
     plt.grid(True, linestyle=':', alpha=0.7)
     plt.tight_layout()
@@ -550,45 +809,26 @@ def visualize_predictions(model, dataset, num_images=9):
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     plt.show()
 
-def build_model(
-    model_name: str,
-    num_classes: int,
-    train_new: bool,
-    weight_path: str | None = None,
-):
-    """
-    Create a model of the given type.
-    If train_new is False, initialize from weight_path instead of random weights.
-    Does NOT run training.
-    """
-    # 1) Instantiate architecture
-    if model_name == 'SimpleCNN':
-        model = SimpleCNN(num_classes=num_classes)
-    elif model_name == 'VGGInspired':
-        model = VGGInspired(num_classes=num_classes)
-    elif model_name == 'ResNetLike':
-        model = ResNetLike(num_classes=num_classes)
-    else:
-        raise ValueError(f"Unknown model_name: {model_name}")
-
-    # 2) Optionally load weights
-    if not train_new:
-        if weight_path is None:
-            raise ValueError("weight_path must be provided when train_new=False.")
-        if not os.path.exists(weight_path):
-            raise FileNotFoundError(f"Weight file not found: {weight_path}")
-        state = torch.load(weight_path, map_location=device)
-        model.load_state_dict(state)
-        print(f"✅ Loaded weights from {weight_path}")
-    else:
-        print(f"✅ Initialized new {model_name} with random weights")
-
-    return model.to(device)
-
 data_dir = "./BreaKHis_400X_patient_split"
 
-train_ds = BreastCancerDataset(os.path.join(data_dir, "train"), compute_stats=True, max_stats_samples=100)
-test_ds = BreastCancerDataset(os.path.join(data_dir, "test"), compute_stats=True)
+train_ds = BreastCancerDataset(
+    os.path.join(data_dir, "train"),
+    compute_stats=True,
+    max_stats_samples=100,
+    augment=True,
+    rotation_degrees=90,
+    color_jitter_params={"brightness":0.8, "contrast":0.8, "saturation":0.6, "hue":0.15}
+)
+# use parameter {"brightness":0.8, "contrast":0.8, "saturation":0.6, "hue":0.15} can produce more stable result (during training)
+# this seems better than {"brightness":0.2, "contrast":0.2, "saturation":0.2, "hue":0.1} because this result is not so stable (risk dropping below 0.8)
+test_ds = BreastCancerDataset(
+    os.path.join(data_dir, "test"),
+    resize=(224, 224),
+    compute_stats=False,          # don't recompute
+    mean=train_ds.mean.tolist(),  # reuse train statistics
+    std=train_ds.std.tolist(),
+    print_stats=False,
+)
 
 # this code shows the normalization of our data
 train_stats = train_ds.compute_input_and_normalized_stats(
@@ -601,14 +841,7 @@ test_loader = DataLoader(test_ds, batch_size=16)
 
 # this code might be used if we want to preserve the mean and std from train dataset
 '''
-test_ds = BreastCancerDataset(
-    os.path.join(data_dir, "test"),
-    resize=(224, 224),
-    compute_stats=False,          # don't recompute
-    mean=train_ds.mean.tolist(),  # reuse train statistics
-    std=train_ds.std.tolist(),
-    print_stats=False,
-)
+test_ds = BreastCancerDataset(os.path.join(data_dir, "test"), compute_stats=True)
 '''
 
 model_name='SimpleCNN'
@@ -617,19 +850,33 @@ model = build_model(
     model_name=model_name,
     num_classes=2,
     train_new=True,
-    weight_path=None,
+    weight_path=None
 )
 
 epoch = 30
 train_losses = []
 val_losses = []
 
+# this code accounts for the imbalanced dataset, now the loss for less common data weights more
+# however, current test shows that this will cause imbalanced confusion matrix
+'''
+labels_np = np.array(train_ds.labels)
+class_counts = np.bincount(labels_np)
+print("Class counts (train):", class_counts)
+class_weights = 1.0 / torch.tensor(class_counts, dtype=torch.float32)
+class_weights = class_weights / class_weights.sum()
+
+print("Class weights:", class_weights)
+criterion = nn.CrossEntropyLoss(weight=class_weights.to(device))
+'''
+
 train_losses, val_losses = train_model(
     model,
     train_loader,
-    test_loader,
+    val_loader=test_loader,   # ideally a real val_loader later
     epochs=epoch,
     lr=1e-4,
+    criterion=None,
     save_dir="./weights",
     save_prefix=model_name,
     save_every=10,
