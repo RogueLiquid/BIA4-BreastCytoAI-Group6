@@ -101,7 +101,7 @@ For deep learning–based models, Grad-CAM is available to visualize regions of 
 - This software does not replace professional medical diagnosis
 - Model performance depends on training data quality and distribution
 - Variations in staining protocols may affect predictions
-- Grad-CAM provides qualitative explanations only
+- Insufficient data from the dataset
 
 
 ## Disclaimer
