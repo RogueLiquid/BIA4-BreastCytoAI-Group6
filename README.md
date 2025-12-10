@@ -1,4 +1,4 @@
-# Breast Cancer Histopathology Image Classification Software -- Group 6
+# Breast Cancer Histopathology Image Classification Software - Group 6
 
 A graphical software tool for classifying breast cancer histopathology staining images as **benign** or **malignant** using **traditional machine learning**, **deep learning**, and **hybrid feature fusion models**.
 
@@ -104,7 +104,7 @@ For deep learning–based models, Grad-CAM is available to visualize regions of 
 - Grad-CAM provides qualitative explanations only
 
 
-## 📄 Disclaimer
+## Disclaimer
 
 This software is intended **for academic, educational, and research purposes only**.  
 It is **not approved for clinical diagnosis or medical decision-making**.
