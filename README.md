@@ -1,121 +1,173 @@
-# Breast Cancer Histopathology Image Classification Software - Group 6
+# Breast Cancer Cell Biopsy Classifier
 
-A graphical software tool for classifying breast cancer histopathology staining images as **benign** or **malignant** using **traditional machine learning**, **deep learning**, and **hybrid feature fusion models**.
+A machine learning-based GUI application for breast cancer cell biopsy classification.
 
-## Project Overview
-This software is designed to assist in the classification of breast cancer histopathology images by combining multiple feature extraction strategies with flexible classification models. Users can interactively upload images, crop regions of interest, select different models, and obtain prediction results with probability estimates and visual explanations.
+## Features
 
-**Key features include:**
-- Image upload and region-of-interest (ROI) cropping
-- Multiple feature extraction methods:
-  - Radiomics (handcrafted features)
-  - SLIC+Kmeans+Birch segmentation and SIFT feature extraction
-  - Hybrid feature fusion (manually extracted + DL features)
-- Prediction probabilities (benign vs malignant)
-- Grad-CAM visualization for model interpretability
-- User-friendly graphical user interface (GUI)
-
-
-## Software Workflow
-Image Input → Image Cropping → Model Selection → Prediction → Probability Output → Grad-CAM (if CNN models)
-
-## Feature Extraction Methods
-
-### 1. Radiomics Features
-Radiomics is a widely used medical imaging approach that extracts quantitative intensity, texture, and shape features from images to uncover patterns relevant for diagnosis and prognosis.
-
-### 2. SLIC segmentation + SIFT features
-This method first applies SLIC superpixel segmentation to partition the image into perceptually homogeneous regions, and then extracts SIFT features within these regions to capture robust local texture and structural information for classification (Manivannan et al., 2025).
-
-
-### 3. Hybrid Feature Fusion
-We integrate manually extracted features such as radiomics and SIFT with deep learning–based features, concatenate them, and perform classification using a multilayer perceptron (MLP).
-
-
-## Classification Models
-Depending on the selected feature extraction method, the software supports:
-- Support Vector Machine (SVM)
-- Random Forest
-- Multilayer Perceptron (MLP)
-- ResNet18
-- ResNet50
-- DesNet121
-- EfficientNet-B0
-- VGG16
-- VGG19
-- 
-
-## Graphical User Interface (GUI)
-The GUI includes the following main components:
-- **Image Upload Panel** for loading histopathology images
-- **Cropping Tool** for selecting regions of interest
-- **Model Selection Panel** for choosing feature extraction and classification method combinations
-- **Result Display Panel** showing classification results and probabilities
-- **Grad-CAM Visualization Panel** (available for deep learning models)
-
-
-## How to Use the Software
-
-### Step 1: Launch the Software
-Run the main program file to open the graphical user interface.
-
-### Step 2: Upload an Image
-Click the **Upload Image** button and select a breast cancer histopathology staining image.
-
-### Step 3: Crop the Image (Optional)
-Use the cropping tool to define the region of interest (ROI) and confirm the selection.
-
-### Step 4: Select models
-<img width="633" height="306" alt="Screenshot 2025-12-10 at 19 33 08" src="https://github.com/user-attachments/assets/81bac5e8-5c3a-4b65-ac54-130e9c5d3a51" />
-
-### Step 5: Run Prediction
-Click the **Predict** button. The software will output:
-- Predicted class (Benign or Malignant)
-- Prediction probability
-
-Example output:
-
-
-
-### Step 6: Model Interpretability (Grad-CAM only for DL models)
-
-For deep learning–based models, Grad-CAM is available to visualize regions of the image that contribute most to the classification decision. The generated heatmap is overlaid on the original image, where warmer colors indicate higher importance.
-
-
+- 🖼️ **Image Viewer**: Supports PNG, JPG, BMP, TIFF medical images
+- ✂️ **Image Cropping**: ROI selection with automatic padding
+- 🧠 **Multi-Model Support**:
+  - Radiomics feature models
+  - Pixel-level CNN models (ResNet, DenseNet, EfficientNet, etc.)
+  - Fusion models (Radiomics + CNN)
+- 📊 **Visualization Analysis**:
+  - GradCAM heatmaps (shows model attention regions)
+  - Occlusion sensitivity maps (shows critical regions)
+- 📋 **Clinical Reports**: Detailed prediction reports with clinical recommendations
+- 🎨 **Modern Interface**: Professional medical application design
 
 ## System Requirements
-### Hardware
-- CPU: Intel i5 / Apple Silicon or higher
-- RAM: ≥ 8 GB recommended
-- GPU: optional
 
-### Software
-- Python 3.10 or above
-- PyTorch
-- OpenCV
-- NumPy
+- Python 3.8+
+- Recommended: 8GB+ RAM, CUDA-compatible GPU (optional)
 
+## Installation and Running
 
-## Limitations
+### Method 1: Run as Python Application
 
-- This software does not replace professional medical diagnosis
-- Model performance depends on training data quality and distribution
-- Variations in staining protocols may affect predictions
-- Insufficient data from the dataset
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
 
+# 2. Run the application
+python gui.py
+```
 
-## Disclaimer
+### Method 2: Package as Standalone Executable
 
-This software is intended **for academic, educational, and research purposes only**.  
-It is **not approved for clinical diagnosis or medical decision-making**.
+#### Cross-Platform Automated Build (Recommended)
 
+```bash
+# Use the automated build script
+python build_exe.py
+```
 
-## Authors
+After building, the executable is located at `dist/BreastCancerClassifier`
 
-Developed by **[Group 6 in BIA4 class]**
+#### Windows-Specific Build
 
-## Acknowledgments
+```cmd
+# Double-click or run in command prompt
+build_windows.bat
+```
 
-- BreakHis dataset
-- PyTorch and OpenCV open-source communities
+#### macOS/Linux-Specific Build
 
+```bash
+# Run the build script
+./build_unix.sh
+```
+
+#### Manual Build (Advanced Users)
+
+```bash
+# 1. Install PyInstaller
+pip install pyinstaller
+
+# 2. Build executable
+pyinstaller --onefile --windowed --name BreastCancerClassifier gui.py
+
+# 3. Add model files
+# Windows:
+pyinstaller --onefile --windowed --add-data "ml_backend.py;." --add-data "models;models" gui.py
+
+# macOS/Linux:
+pyinstaller --onefile --windowed --add-data "ml_backend.py:." --add-data "models:models" gui.py
+```
+
+## Project Structure
+
+```
+├── gui.py                 # Main GUI application
+├── ml_backend.py          # Machine learning backend
+├── requirements.txt       # Python dependencies
+├── build_exe.py          # Automated build script
+├── build_windows.bat     # Windows build script
+├── build_unix.sh         # macOS/Linux build script
+├── README.md             # This documentation
+└── [model folders]/      # Trained model files
+    ├── model (.pth)/
+    ├── other info/
+    └── ...
+```
+
+## Usage Instructions
+
+### Basic Workflow
+
+1. **Launch Application**: Run `python gui.py` or double-click the executable
+2. **Select Model**: Choose a pretrained model from the dropdown menu
+3. **Load Image**: Click "Open Image" to select a medical image
+4. **Optional Operations**:
+   - Use "Crop" tool to select region of interest
+   - Use "Reset" to restore original image
+5. **Predict Classification**: Click "Predict Classification"
+6. **Visualization Analysis**:
+   - Click "GradCAM" to view model attention regions
+   - Click "Occlusion" to view critical region sensitivity
+
+### Model Type Descriptions
+
+- **Radiomics Only**: MLP model based on 39 radiomics features
+- **Pixel Only**: CNN model that uses images directly
+- **Fusion**: Combined model using both radiomics features and images
+
+## Technical Details
+
+### Dependencies
+
+- **PyTorch**: Deep learning framework
+- **OpenCV**: Image processing
+- **Pillow**: Image loading and manipulation
+- **scikit-image**: Radiomics feature extraction
+- **matplotlib**: Visualization
+- **tkinter**: GUI framework
+
+### Feature Extraction
+
+- **Radiomics Features**: GLCM, GLRLM, GLSZM statistical features
+- **Pixel Features**: RGB channel statistics and texture features
+
+### Model Architectures
+
+- **RadiomicsMLP**: 39-dimensional input → 128 → 64 → 2-class classification
+- **CNN Models**: ResNet, DenseNet, EfficientNet pretrained models
+- **Fusion Models**: Radiomics features + ResNet feature fusion
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Model Loading Failure**
+   - Ensure .pth files are in correct locations
+   - Check file permissions
+
+2. **CUDA Errors**
+   - Install CUDA version of PyTorch: `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118`
+
+3. **Memory Insufficient**
+   - Use smaller models or reduce batch size
+   - Close unnecessary applications
+
+4. **Executable Build Failure**
+   - Ensure all dependencies are installed
+   - Check disk space (requires 2-3GB)
+
+### Performance Optimization
+
+- Use GPU acceleration (if available)
+- Choose appropriate model sizes
+- Regularly clean temporary files
+
+## License
+
+This project is for educational and research purposes only.
+
+## Contributing
+
+Issues and improvement suggestions are welcome!
+
+## Version History
+
+- **v2.0**: Added Occlusion visualization, improved interface, enhanced clinical reports
+- **v1.0**: Basic functionality implementation
