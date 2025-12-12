@@ -23,7 +23,7 @@ A machine learning-based GUI application for breast cancer cell biopsy classific
 
 ## Installation and Running
 
-### Method 1: Run as Python Application
+### Method 1: Run as Python Application (Recommended)
 
 ```bash
 # 1. Install dependencies
@@ -35,7 +35,7 @@ python gui.py
 
 ### Method 2: Package as Standalone Executable
 
-#### Cross-Platform Automated Build (Recommended)
+#### Cross-Platform Automated Build
 
 ```bash
 # Use the automated build script
