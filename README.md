@@ -1,6 +1,6 @@
-# Breast Cancer Cell Biopsy Classifier
+# BreastCytoAI
 
-A machine learning-based GUI application for breast cancer cell biopsy classification.
+An AI-powered app that predicts benign and malignant breast cancer cells using multiple features and models.
 
 ## Features
 
