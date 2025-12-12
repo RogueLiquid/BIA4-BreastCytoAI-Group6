@@ -817,7 +817,7 @@ train_ds = BreastCancerDataset(
     max_stats_samples=100,
     augment=True,
     rotation_degrees=90,
-    color_jitter_params={"brightness":0.8, "contrast":0.8, "saturation":0.6, "hue":0.15}
+    color_jitter_params={"brightness":0.8, "contrast":0.2, "saturation":0.6, "hue":0.1}
 )
 # use parameter {"brightness":0.8, "contrast":0.8, "saturation":0.6, "hue":0.15} can produce more stable result (during training)
 # this seems better than {"brightness":0.2, "contrast":0.2, "saturation":0.2, "hue":0.1} because this result is not so stable (risk dropping below 0.8)

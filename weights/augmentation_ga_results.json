@@ -1,0 +1,635 @@
+{
+  "timestamp": "2025-12-11T04:38:31.609920",
+  "seed": 42,
+  "meta": {
+    "num_generations": 6,
+    "population_size": 12,
+    "search_epochs": 5,
+    "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+    "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+  },
+  "history": [
+    {
+      "generation": 3,
+      "individual": 1,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.35017643965114986,
+        "contrast": 0.04869612087077515,
+        "saturation": 0.9658267901482704,
+        "hue": 0.19082161886247312
+      },
+      "val_loss": 0.8001737776729796,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 3,
+      "individual": 2,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.3188114693629905,
+        "contrast": 0.16513538707975198,
+        "saturation": 0.957340615458412,
+        "hue": 0.2031539293871027
+      },
+      "val_loss": 0.7665389676888784,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 3,
+      "individual": 3,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.26418109976175896,
+        "contrast": 0.027095643059495647,
+        "saturation": 0.8500721451368657,
+        "hue": 0.23659363708434
+      },
+      "val_loss": 0.9691820873154534,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 3,
+      "individual": 4,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.37545519258695204,
+        "contrast": 0.12298946005814326,
+        "saturation": 0.8441032901785079,
+        "hue": 0.2495603503827224
+      },
+      "val_loss": 1.0579679898089833,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 3,
+      "individual": 5,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.4332870998512553,
+        "contrast": 0.03688247983396676,
+        "saturation": 0.8697684538098102,
+        "hue": 0.15124718259415235
+      },
+      "val_loss": 0.9571576627592245,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 3,
+      "individual": 6,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.3012370003910343,
+        "contrast": 0.09114815657650985,
+        "saturation": 0.9095808652450011,
+        "hue": 0.16472526138722837
+      },
+      "val_loss": 0.847345189915763,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 3,
+      "individual": 7,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.37813966333174476,
+        "contrast": 0.024229542480548125,
+        "saturation": 0.8873283915966265,
+        "hue": 0.17411684927418458
+      },
+      "val_loss": 0.772301028172175,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 3,
+      "individual": 8,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.33919393570540884,
+        "contrast": 0.13638201869494798,
+        "saturation": 0.8726095069776516,
+        "hue": 0.19260092366417458
+      },
+      "val_loss": 0.7509346910648875,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 3,
+      "individual": 9,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.3732800818666605,
+        "contrast": 0.008068256502310116,
+        "saturation": 0.9375316543543161,
+        "hue": 0.14963713432338455
+      },
+      "val_loss": 0.7484713130527072,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 3,
+      "individual": 10,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.24143933789746974,
+        "contrast": 0.1648177369712854,
+        "saturation": 0.9945295403883996,
+        "hue": 0.22937128737703077
+      },
+      "val_loss": 0.7683731441696485,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 3,
+      "individual": 11,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.3013298819444925,
+        "contrast": 0.016965267320156983,
+        "saturation": 0.9497383572647741,
+        "hue": 0.18334068057992328
+      },
+      "val_loss": 0.7787473532888625,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 3,
+      "individual": 12,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.25568599836234457,
+        "contrast": 0.08601030843110415,
+        "saturation": 0.8463005214362337,
+        "hue": 0.24198666912232086
+      },
+      "val_loss": 0.9309446944130791,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 1,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.30193243597115327,
+        "contrast": 0.09851449367388178,
+        "saturation": 0.9076500657735235,
+        "hue": 0.1928284209802542
+      },
+      "val_loss": 0.9002718660566542,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 2,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.3595184955198058,
+        "contrast": 0.0274871404623251,
+        "saturation": 0.9959190718783356,
+        "hue": 0.21833490119858456
+      },
+      "val_loss": 0.8105439386434026,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 3,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.43807622796398765,
+        "contrast": 0.13305735585766515,
+        "saturation": 0.9460489494756348,
+        "hue": 0.2330090423647848
+      },
+      "val_loss": 0.8432326399617724,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 4,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.2678749400615338,
+        "contrast": 0.029141891398877712,
+        "saturation": 0.8718950806742889,
+        "hue": 0.17335465193879956
+      },
+      "val_loss": 0.7302847483919727,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 5,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.32791189758904626,
+        "contrast": 0.040348548426819036,
+        "saturation": 0.9770211618757119,
+        "hue": 0.17649695153183204
+      },
+      "val_loss": 0.7270155606998338,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 6,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.30636334158862605,
+        "contrast": 0.08069680237739517,
+        "saturation": 0.8847350457590016,
+        "hue": 0.2210413169378771
+      },
+      "val_loss": 0.8519293144345284,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 7,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.26508656838710404,
+        "contrast": 0.14674625921053955,
+        "saturation": 0.9694413496360114,
+        "hue": 0.16069318701589036
+      },
+      "val_loss": 0.8483297930409511,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 8,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.2512808630758704,
+        "contrast": 0.121255951130975,
+        "saturation": 0.960668108879573,
+        "hue": 0.21372233566657184
+      },
+      "val_loss": 0.7910816942652067,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 9,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.404430508988339,
+        "contrast": 0.011010152484086752,
+        "saturation": 0.9139232875688943,
+        "hue": 0.1524085248149861
+      },
+      "val_loss": 0.9701255808273951,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 10,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.4227971248262685,
+        "contrast": 0.0926820136052783,
+        "saturation": 0.9102244402763477,
+        "hue": 0.1471774538910755
+      },
+      "val_loss": 0.7952955174777243,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 11,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.3123729039942823,
+        "contrast": 0.04835349855724938,
+        "saturation": 0.963720393023542,
+        "hue": 0.20457736599799442
+      },
+      "val_loss": 0.9087313442594476,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 4,
+      "individual": 12,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.4276189881664152,
+        "contrast": 0.07021652758886526,
+        "saturation": 0.8818731340056096,
+        "hue": 0.2121460975847726
+      },
+      "val_loss": 0.7898664822181066,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 1,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.39364061442063275,
+        "contrast": 0.07410512205231215,
+        "saturation": 0.9730871450405338,
+        "hue": 0.19030458522617236
+      },
+      "val_loss": 0.7549736110700501,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 2,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.35396524454814887,
+        "contrast": 0.05644800730374803,
+        "saturation": 0.8854803705294186,
+        "hue": 0.1581459044452485
+      },
+      "val_loss": 0.7057873706022898,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 3,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.27208130393227226,
+        "contrast": 0.08402491924896913,
+        "saturation": 0.9194323414807652,
+        "hue": 0.19153584312619834
+      },
+      "val_loss": 0.8160515899459521,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 4,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.41810418530549864,
+        "contrast": 0.0329139169518515,
+        "saturation": 0.9307161354830357,
+        "hue": 0.21211754707439384
+      },
+      "val_loss": 0.7635035630729463,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 5,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.30497613389975364,
+        "contrast": 0.010163615479377023,
+        "saturation": 0.9165411484296835,
+        "hue": 0.1625900594669735
+      },
+      "val_loss": 0.7575322464108467,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 6,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.42179271504157867,
+        "contrast": 0.10669569264510695,
+        "saturation": 0.9569225426829102,
+        "hue": 0.2217766680447829
+      },
+      "val_loss": 0.6646001040935516,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 7,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.4007884524676689,
+        "contrast": 0.02463274304555169,
+        "saturation": 0.9873749793162162,
+        "hue": 0.19410013902211068
+      },
+      "val_loss": 0.8315953090786934,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 8,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.40141646551182697,
+        "contrast": 0.11831044524594887,
+        "saturation": 0.9198609458797185,
+        "hue": 0.1583259459064462
+      },
+      "val_loss": 0.7585223118464152,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 9,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.30483230007480683,
+        "contrast": 0.05639080821864835,
+        "saturation": 0.9786155442328277,
+        "hue": 0.22088250080050173
+      },
+      "val_loss": 0.7917605849603812,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 10,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.26800179473968166,
+        "contrast": 0.06743368759553665,
+        "saturation": 0.9315419808823595,
+        "hue": 0.16766393640170063
+      },
+      "val_loss": 0.7518193821112314,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 11,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.286820667540097,
+        "contrast": 0.04457514681144753,
+        "saturation": 0.9932915166573484,
+        "hue": 0.17608852986420273
+      },
+      "val_loss": 0.6333059130443467,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    },
+    {
+      "generation": 5,
+      "individual": 12,
+      "config": {
+        "p_hflip": 0.5,
+        "p_vflip": 0.5,
+        "rotation_degrees": 90.0,
+        "brightness": 0.35330820994171086,
+        "contrast": 0.0928192094380709,
+        "saturation": 0.9252223143902868,
+        "hue": 0.23013679242255317
+      },
+      "val_loss": 0.8041810219486555,
+      "search_epochs": 5,
+      "train_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\train",
+      "val_dir": "D:\\project\\BIA4\\BreakHis_400X_full\\validation"
+    }
+  ],
+  "best_config": {
+    "p_hflip": 0.5,
+    "p_vflip": 0.5,
+    "rotation_degrees": 90.0,
+    "brightness": 0.286820667540097,
+    "contrast": 0.04457514681144753,
+    "saturation": 0.9932915166573484,
+    "hue": 0.17608852986420273
+  },
+  "best_val_loss": 0.6333059130443467
+}

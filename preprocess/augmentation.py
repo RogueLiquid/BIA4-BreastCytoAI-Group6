@@ -19,17 +19,17 @@ aug = transforms.Compose(
     [
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.RandomVerticalFlip(p=0.5),
-        transforms.RandomRotation(degrees=45),
+        transforms.RandomRotation(degrees=90),
         transforms.ColorJitter(
-            brightness=0.2,
-            contrast=0.2,
-            saturation=0.2,
-            hue=0.05,
+            brightness=0.4,
+            contrast=0.6,
+            saturation=0.8,
+            hue=0.15,
         ),
     ]
 )
 
-N_AUG_PER_IMAGE = 4  # how many extra images per original
+N_AUG_PER_IMAGE = 3  # how many extra images per original
 
 
 def copy_with_augmentation(src_dir: Path, dst_dir: Path, apply_aug: bool) -> None:

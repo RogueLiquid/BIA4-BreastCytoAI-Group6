@@ -1,10 +1,11 @@
 import torch
 import torchvision.transforms as T
+import torchvision.transforms.functional as F
 from PIL import Image
 import matplotlib.pyplot as plt
 import os
-import glob
 import cv2
+import glob
 import numpy as np
 from tqdm import tqdm
 
@@ -18,48 +19,61 @@ def demo_augmentations(image_path):
     # Load image as RGB
     img = Image.open(image_path).convert("RGB")
 
-    # For reproducibility of random augmentations
-    torch.manual_seed(0)
+    # No randomness now – everything is deterministic
+    # (you can drop manual_seed entirely)
+    # torch.manual_seed(0)
 
-    # Define individual transforms
-    hflip = T.RandomHorizontalFlip(p=1.0)       # always flip
-    rotation = T.RandomRotation(degrees=90)     # random angle in [-10, 10]
+    # --- Geometric transforms (deterministic) ---
+    # Always flip horizontally
+    img_flip = F.hflip(img)
 
-    jitter_bright = T.ColorJitter(brightness=0.8)        # brightness only
-    jitter_contrast = T.ColorJitter(contrast=0.8)        # contrast only
-    jitter_saturation = T.ColorJitter(saturation=0.6)    # saturation only
-    jitter_hue = T.ColorJitter(hue=0.15)                  # hue only (∈ [-0.1, 0.1])
+    # Rotate by a fixed angle (e.g. +90°) instead of random in [-10, 10]
+    img_rot = F.rotate(img, angle=90)  # change to 10 if you want ±10° example
 
-    # A combined ColorJitter like you might use in training
-    jitter_full = T.ColorJitter(
-        brightness=0.2,
-        contrast=0.2,
-        saturation=0.2,
-        hue=0.05,
-    )
+    # --- Color transforms with MAX changes ---
 
-    # Apply each transform once
-    img_flip = hflip(img)
-    img_rot = rotation(img)
-    img_bright = jitter_bright(img)
-    img_contrast = jitter_contrast(img)
-    img_sat = jitter_saturation(img)
-    img_hue = jitter_hue(img)
-    img_full = jitter_full(img)
+    # 1) Brightness
+    # ColorJitter(brightness=0.8) means factor ∈ [0.2, 1.8].
+    # Here we explicitly use the max factor 1.8 (much brighter).
+    brightness_amount = -0.4
+    img_bright = F.adjust_brightness(img, 1.0 + brightness_amount)  # factor=1.8
+
+    # 2) Contrast
+    # contrast=0.4 -> factor ∈ [0.6, 1.4]; use 1.4 as “max contrast”.
+    contrast_amount = -0.6
+    img_contrast = F.adjust_contrast(img, 1.0 + contrast_amount)    # factor=1.4
+
+    # 3) Saturation
+    # saturation=0.8 -> factor ∈ [0.2, 1.8]; use 1.8 as “max saturation”.
+    saturation_amount = -0.8
+    img_sat = F.adjust_saturation(img, 1.0 + saturation_amount)     # factor=1.8
+
+    # 4) Hue
+    # hue=0.15 -> random hue_factor ∈ [-0.15, 0.15]; here use +0.15 (max shift).
+    # hue_factor must be in [-0.5, 0.5].
+    hue_amount = -0.15
+    img_hue = F.adjust_hue(img, hue_factor=hue_amount)              # +0.15
+
+    # 5) A combined “max-ish” jitter configuration
+    img_full = img
+    img_full = F.adjust_brightness(img_full, 1.0 + 0.2)
+    img_full = F.adjust_contrast(img_full,   1.0 + 0.2)
+    img_full = F.adjust_saturation(img_full, 1.0 + 0.2)
+    img_full = F.adjust_hue(img_full,        hue_factor=0.05)
 
     # Plot grid
     fig, axes = plt.subplots(2, 4, figsize=(14, 7))
     axes = axes.ravel()
 
-    show_image(img, axes[0], "Original")
-    show_image(img_flip, axes[1], "Horizontal Flip (p=1.0)")
-    show_image(img_rot, axes[2], "RandomRotation(±10°)")
-    show_image(img_bright, axes[3], "ColorJitter(brightness=0.4)")
+    show_image(img,        axes[0], "Original")
+    show_image(img_flip,   axes[1], "Horizontal Flip")
+    show_image(img_rot,    axes[2], "Rotate(90°)")
+    show_image(img_bright, axes[3], "Brightness factor = 1.8")
 
-    show_image(img_contrast, axes[4], "ColorJitter(contrast=0.4)")
-    show_image(img_sat, axes[5], "ColorJitter(saturation=0.4)")
-    show_image(img_hue, axes[6], "ColorJitter(hue=0.2)")
-    show_image(img_full, axes[7], "Full Jitter (b=0.2,c=0.2,s=0.2,h=0.05)")
+    show_image(img_contrast, axes[4], "Contrast factor = 1.4")
+    show_image(img_sat,      axes[5], "Saturation factor = 1.8")
+    show_image(img_hue,      axes[6], "Hue shift = +0.15")
+    show_image(img_full,     axes[7], "Combined jitter (max-ish)")
 
     plt.tight_layout()
     plt.show()
@@ -178,9 +192,6 @@ def estimate_color_distributions(
     )
 
     return stats
-
-root = "./BreaKHis_400X_patient_split/train/malignant"
-stats = estimate_color_distributions(root, pattern="*.png", max_images=500)
 
 image_path = "./BreaKHis_400X_patient_split/train/malignant/SOB_M_DC-14-13993-400-033.png"
 demo_augmentations(image_path)
