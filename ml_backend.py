@@ -18,21 +18,23 @@ IMAGENET_STD = [0.229, 0.224, 0.225]
 # ================= 模型定义 =================
 
 class RadiomicsMLP(nn.Module):
-    """基于影像组学特征的MLP模型"""
-    def __init__(self, input_dim=39, num_classes=2, hidden_dims=[128, 64], dropout=0.3):
+    """基于影像组学特征的MLP模型 - 匹配训练时的架构（包含BatchNorm）"""
+    def __init__(self, input_dim=39, num_classes=2):
         super().__init__()
-        layers = []
-        prev_dim = input_dim
-        for hidden_dim in hidden_dims:
-            layers.append(nn.Linear(prev_dim, hidden_dim))
-            layers.append(nn.ReLU())
-            layers.append(nn.Dropout(dropout))
-            prev_dim = hidden_dim
-        layers.append(nn.Linear(prev_dim, num_classes))
-        self.layers = nn.Sequential(*layers)
-        
+        self.mlp = nn.Sequential(
+            nn.Linear(input_dim, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(128, 64),
+            nn.BatchNorm1d(64),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(64, num_classes)
+        )
+
     def forward(self, x):
-        return self.layers(x)
+        return self.mlp(x)
 
 class SimpleMLP(nn.Module):
     """A simple multilayer perceptron for pixel features"""
@@ -221,6 +223,16 @@ class VGG16(nn.Module):
     def forward(self, x):
         return self.model(x)
 
+class AlexNet(nn.Module):
+    def __init__(self, num_classes=2):
+        super().__init__()
+        base = models.alexnet(weights=models.AlexNet_Weights.IMAGENET1K_V1)
+        base.classifier[6] = nn.Linear(base.classifier[6].in_features, num_classes)
+        self.model = base
+
+    def forward(self, x):
+        return self.model(x)
+
 # ================= 模型加载管理 =================
 
 _model_instances = {}  # 缓存已加载的模型
@@ -232,6 +244,7 @@ MODEL_TYPE_MAPPING = {
     "Radiomics_RandomForest": "pixel_ml",  # Same as pixel models: extracts pixel features from image
 
     # Pixel models (CNN architectures)
+    "Pixel_AlexNet": "pixel",
     "Pixel_DenseNet121": "pixel",
     "Pixel_EfficientNetB0": "pixel",
     "Pixel_MobileNetV2": "pixel",
@@ -354,6 +367,8 @@ def load_model(model_path, model_type="auto"):
             model = SimpleCNN(num_classes=2)
         elif "VGG16" in model_name:
             model = VGG16(num_classes=2)
+        elif "AlexNet" in model_name:
+            model = AlexNet(num_classes=2)
         elif "SimpleMLP" in model_name:
             model = SimpleMLP(input_dim=3*224*224, num_classes=2)
         else:
