@@ -211,27 +211,15 @@ class SimpleCNN(nn.Module):
         x = x.view(x.size(0), -1)
         return self.fc(x)
 
-class VGGInspired(nn.Module):
+class VGG16(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
-        self.features = nn.Sequential(
-            nn.Conv2d(3, 64, 3, padding=1), nn.ReLU(),
-            nn.Conv2d(64, 64, 3, padding=1), nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(64, 128, 3, padding=1), nn.ReLU(),
-            nn.Conv2d(128, 128, 3, padding=1), nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(128, 256, 3, padding=1), nn.ReLU(),
-            nn.MaxPool2d(2),
-        )
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(256*28*28, 512), nn.ReLU(), nn.Dropout(0.5),
-            nn.Linear(512, num_classes)
-        )
+        base = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_V1)
+        base.classifier[6] = nn.Linear(base.classifier[6].in_features, num_classes)
+        self.model = base
 
     def forward(self, x):
-        return self.classifier(self.features(x))
+        return self.model(x)
 
 # ================= 模型加载管理 =================
 
@@ -364,8 +352,8 @@ def load_model(model_path, model_type="auto"):
             model = MobileNetV2_PT_FT(num_classes=2)
         elif "SimpleCNN" in model_name:
             model = SimpleCNN(num_classes=2)
-        elif "VGGInspired" in model_name:
-            model = VGGInspired(num_classes=2)
+        elif "VGG16" in model_name:
+            model = VGG16(num_classes=2)
         elif "SimpleMLP" in model_name:
             model = SimpleMLP(input_dim=3*224*224, num_classes=2)
         else:
