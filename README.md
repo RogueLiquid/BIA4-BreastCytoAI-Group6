@@ -105,7 +105,7 @@ pyinstaller --onefile --windowed --add-data "ml_backend.py:." --add-data "models
 0. **Launch Application**: Run `python gui.py` or double-click the executable
 1. **Load Image**: Click "Open Image" to select a medical image
 2. **Select Model**: Choose a pretrained model from the dropdown menu
-3/4. **Optional Operations**:
+3. **Optional Operations**:
    - Use "Crop" tool to select region of interest
    - Use "Image Processing" to apply enhancement, blur and sharpening
    - Use "Reset" to restore original image
