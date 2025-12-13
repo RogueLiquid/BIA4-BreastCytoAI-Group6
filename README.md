@@ -25,9 +25,11 @@ An AI-powered app that predicts benign and malignant breast cancer cells using m
 
 ## Installation and Running
 
+### Models Preparation
+
 To get models for this tool please download from: https://zenodo.org/records/17921766
 
-### Method 1: Run as Python Application (Recommended)
+### Tool Usage Method 1: Run as Python Application (Recommended)
 
 ```bash
 # 1. Install dependencies
@@ -37,7 +39,7 @@ pip install -r requirements.txt
 python gui.py
 ```
 
-### Method 2: Package as Standalone Executable
+### Tool Usage Method 2: Package as Standalone Executable
 
 #### Cross-Platform Automated Build
 
