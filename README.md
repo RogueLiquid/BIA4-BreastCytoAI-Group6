@@ -8,10 +8,9 @@ An AI-powered app that predicts benign and malignant breast cancer cells using m
 - ✂️ **Image Cropping**: ROI selection with automatic padding
 - 🧠 **Multi-Model Support**:
   - Radiomics feature models (texture, shape, intensity features)
-  - Pixel-level CNN models (ResNet, DenseNet, EfficientNet, MobileNet, etc.)
+  - Pixel-level models (ResNet, DenseNet, EfficientNet, MobileNet, etc.)
   - SIFT feature models (scale-invariant keypoints and descriptors)
-  - Fusion models (Radiomics + CNN, SIFT + CNN)
-  - Traditional ML models (Random Forest, MLP)
+  - Fusion models (Radiomics + Pixel, SIFT + Pixel)
 - 📊 **Visualization Analysis**:
   - GradCAM heatmaps (shows model attention regions)
   - Occlusion sensitivity maps (shows critical regions)
@@ -101,11 +100,14 @@ pyinstaller --onefile --windowed --add-data "ml_backend.py:." --add-data "models
 
 ### Basic Workflow
 
-1. **Launch Application**: Run `python gui.py` or double-click the executable
+<img width="2092" height="1368" alt="a8f684779bdbd181369a40ecc9957867" src="https://github.com/user-attachments/assets/6525ff0a-f736-48ce-a958-29912ebc9c24" />
+
+0. **Launch Application**: Run `python gui.py` or double-click the executable
+1. **Load Image**: Click "Open Image" to select a medical image
 2. **Select Model**: Choose a pretrained model from the dropdown menu
-3. **Load Image**: Click "Open Image" to select a medical image
-4. **Optional Operations**:
+3/4. **Optional Operations**:
    - Use "Crop" tool to select region of interest
+   - Use "Image Processing" to apply enhancement, blur and sharpening
    - Use "Reset" to restore original image
 5. **Predict Classification**: Click "Predict Classification"
 6. **Visualization Analysis**:
