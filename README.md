@@ -35,7 +35,7 @@ An AI-powered app that predicts benign and malignant breast cancer cells using m
 ```bash
 # Clone the project repository
 git clone https://github.com/RogueLiquid/BIA4-BreastCytoAI-Group6
-cd BreastCytoAI
+cd BIA4-BreastCytoAI-Group6
 ```
 
 ### Step 2: Models Preparation
