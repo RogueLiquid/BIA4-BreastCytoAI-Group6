@@ -24,17 +24,47 @@ An AI-powered app that predicts benign and malignant breast cancer cells using m
 
 ## Installation and Running
 
-### Models Preparation
+### Prerequisites
+
+- Python 3.8+ (managed via conda)
+- Git
+- Recommended: 8GB+ RAM, CUDA-compatible GPU (optional)
+
+### Step 1: Clone the Repository
+
+```bash
+# Clone the project repository
+git clone https://github.com/RogueLiquid/BIA4-BreastCytoAI-Group6
+cd BreastCytoAI
+```
+
+### Step 2: Models Preparation
 
 To get models for this tool please download from: https://zenodo.org/records/17921766
+
+Please move the decompressed `\Model` directory under `\BreastCytoAI`.
+
+### Step 3: Environment Setup with Conda
+
+```bash
+# 1. Create a new conda environment
+conda create -n breastcytoai python=3.8 -y
+
+# 2. Activate the environment
+conda activate breastcytoai
+
+# 3. Install dependencies
+pip install -r requirements.txt
+```
 
 ### Tool Usage Method 1: Run as Python Application (Recommended)
 
 ```bash
-# 1. Install dependencies
-pip install -r requirements.txt
+# Ensure you're in the project directory and environment is activated
+cd BreastCytoAI
+conda activate breastcytoai
 
-# 2. Run the application
+# Run the application
 python gui.py
 ```
 
@@ -43,6 +73,9 @@ python gui.py
 #### Cross-Platform Automated Build
 
 ```bash
+# Ensure environment is activated
+conda activate breastcytoai
+
 # Use the automated build script
 python build_exe.py
 ```
@@ -52,6 +85,9 @@ After building, the executable is located at `dist/BreastCancerClassifier`
 #### Windows-Specific Build
 
 ```cmd
+# Activate conda environment first
+conda activate breastcytoai
+
 # Double-click or run in command prompt
 build_windows.bat
 ```
@@ -59,6 +95,9 @@ build_windows.bat
 #### macOS/Linux-Specific Build
 
 ```bash
+# Activate conda environment first
+conda activate breastcytoai
+
 # Run the build script
 ./build_unix.sh
 ```
@@ -66,18 +105,33 @@ build_windows.bat
 #### Manual Build (Advanced Users)
 
 ```bash
-# 1. Install PyInstaller
+# 1. Ensure environment is activated
+conda activate breastcytoai
+
+# 2. Install PyInstaller (if not already installed)
 pip install pyinstaller
 
-# 2. Build executable
+# 3. Build executable
 pyinstaller --onefile --windowed --name BreastCancerClassifier gui.py
 
-# 3. Add model files
+# 4. Add model files
 # Windows:
 pyinstaller --onefile --windowed --add-data "ml_backend.py;." --add-data "models;models" gui.py
 
 # macOS/Linux:
 pyinstaller --onefile --windowed --add-data "ml_backend.py:." --add-data "models:models" gui.py
+```
+
+### Environment Cleanup
+
+After using the application, you can deactivate the conda environment:
+
+```bash
+# Deactivate the environment
+conda deactivate
+
+# Optional: Remove the environment if no longer needed
+conda env remove -n breastcytoai
 ```
 
 ## Project Structure
