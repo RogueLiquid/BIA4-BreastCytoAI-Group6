@@ -18,6 +18,8 @@ import numpy as np
 import cv2
 import glob
 import time
+import threading
+import queue
 try:
     import matplotlib.pyplot as plt
     from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -353,21 +355,145 @@ class Card(tk.Frame):
 
 # ==================== MAIN APPLICATION ====================
 
+class ProgressWindow:
+    """独立的进度显示窗口"""
+
+    def __init__(self, parent, title="Progress", total_models=0):
+        self.parent = parent
+        self.total_models = total_models
+
+        # 创建窗口
+        self.window = tk.Toplevel(parent)
+        self.window.title(title)
+        self.window.geometry("400x180")
+        self.window.configure(bg=Theme.SURFACE)
+        self.window.resizable(False, False)
+        self.window.transient(parent)
+        self.window.grab_set()
+
+        # 居中显示
+        self.window.update_idletasks()
+        x = parent.winfo_x() + (parent.winfo_width() - self.window.winfo_width()) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - self.window.winfo_height()) // 2
+        self.window.geometry(f"+{x}+{y}")
+
+        # 强制显示窗口
+        self.window.deiconify()
+        self.window.update()
+
+        # 内容框架
+        main_frame = tk.Frame(self.window, bg=Theme.SURFACE, padx=20, pady=20)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # 标题
+        title_label = tk.Label(
+            main_frame,
+            text="Running All Models Prediction",
+            font=(Config.FONT_FAMILY, 14, "bold"),
+            bg=Theme.SURFACE,
+            fg=Theme.TEXT_PRIMARY
+        )
+        title_label.pack(pady=(0, 15))
+
+        # 自定义进度条框架
+        progress_frame = tk.Frame(main_frame, bg=Theme.BORDER, height=30, relief=tk.FLAT, borderwidth=2)
+        progress_frame.pack(fill=tk.X, pady=(0, 10))
+        progress_frame.pack_propagate(False)
+
+        # 进度条背景
+        self.progress_canvas = tk.Canvas(
+            progress_frame,
+            bg=Theme.BORDER,  # 深色背景
+            height=30,
+            width=350,  # 设置固定宽度
+            highlightthickness=1,
+            highlightbackground=Theme.TEXT_PRIMARY
+        )
+        self.progress_canvas.pack(fill=tk.BOTH, expand=True)
+
+        # 添加背景矩形
+        self.progress_bg = self.progress_canvas.create_rectangle(
+            0, 0, 350, 30,
+            fill=Theme.SURFACE,  # 浅色背景
+            outline=Theme.TEXT_SECONDARY,
+            width=1
+        )
+
+        # 进度条填充（初始为0）
+        self.progress_fill = self.progress_canvas.create_rectangle(
+            0, 0, 0, 30,
+            fill=Theme.SECONDARY,  # 蓝色填充
+            outline=""
+        )
+
+        # 状态标签
+        self.status_label = tk.Label(
+            main_frame,
+            text=f"0 / {total_models} models completed",
+            font=(Config.FONT_FAMILY, 11),
+            bg=Theme.SURFACE,
+            fg=Theme.TEXT_SECONDARY
+        )
+        self.status_label.pack()
+
+        # 当前模型标签
+        self.current_label = tk.Label(
+            main_frame,
+            text="Preparing...",
+            font=(Config.FONT_FAMILY, 10),
+            bg=Theme.SURFACE,
+            fg=Theme.TEXT_SECONDARY
+        )
+        self.current_label.pack(pady=(5, 0))
+
+    def update_progress(self, completed, total, current_model=""):
+        """更新进度"""
+        if total > 0:
+            percentage = (completed / total) * 100
+
+            # 更新自定义进度条
+            canvas_width = self.progress_canvas.winfo_width()
+            if canvas_width <= 1:  # 如果还没显示，使用固定宽度
+                canvas_width = 350
+
+            fill_width = int((percentage / 100) * canvas_width)
+
+            # 确保fill_width不超过canvas宽度
+            fill_width = min(fill_width, canvas_width)
+
+            # 更新进度条矩形的位置
+            self.progress_canvas.coords(self.progress_fill, 0, 0, fill_width, 25)
+
+            # 更新标签
+            self.status_label.config(text=f"{completed} / {total} models completed")
+            if current_model:
+                self.current_label.config(text=f"Processing: {current_model}")
+            else:
+                self.current_label.config(text="Finalizing results...")
+
+        # 强制更新UI
+        self.window.update_idletasks()
+
+    def close(self):
+        """关闭窗口"""
+        self.window.destroy()
+
+
 class BreastCancerClassifierGUI:
     """
     Main Application Class
-    
+
     Professional GUI for breast cancer cell classification using ML.
     Integrates with teammate's ML backend for feature extraction and prediction.
     """
-    
+
     def __init__(self, root):
         self.root = root
         self.root.title(Config.APP_TITLE)
         self.root.geometry(f"{Config.WINDOW_WIDTH}x{Config.WINDOW_HEIGHT}")
         self.root.configure(bg=Theme.BACKGROUND)
         self.root.minsize(Config.MIN_WIDTH, Config.MIN_HEIGHT)
-        
+
         # Initialize state
         self.current_image_path = None
         self.original_image = None
@@ -397,13 +523,13 @@ class BreastCancerClassifierGUI:
         self.kernel_var = tk.IntVar(value=1)
         self.sigma_var = tk.DoubleVar(value=0.0)
         self.strength_var = tk.DoubleVar(value=0.0)
-        
+
         # --- 新增：配置 TTK 样式以美化滚动条 ---
         style = ttk.Style()
         style.theme_use('clam') # 使用 'clam' 主题作为基础，更容易定制
-        
+
         # 配置 Scrollbar 样式
-        style.configure("TScrollbar", 
+        style.configure("TScrollbar",
             gripcolor=Theme.TEXT_SECONDARY,    # 滑块抓手颜色 (灰色)
             troughcolor=Theme.BACKGROUND,      # 凹槽背景色 (浅页面背景)
             background=Theme.BORDER,           # 滚动条背景色 (边框色)
@@ -414,7 +540,7 @@ class BreastCancerClassifierGUI:
             background=[('active', Theme.TEXT_SECONDARY)] # 鼠标悬停时
         )
         # ------------------------------------
-        
+
         # Build UI
         self.create_interface()
     
@@ -1274,6 +1400,39 @@ class BreastCancerClassifierGUI:
         )
         self.confidence_label.pack(pady=(0, 8))
 
+        # Progress bar for all models mode
+        self.progress_frame = tk.Frame(results, bg=Theme.SURFACE)
+        self.progress_frame.pack(fill=tk.X, padx=12, pady=(0, 8))
+        self.progress_frame.pack_forget()  # Hidden by default
+
+        tk.Label(
+            self.progress_frame,
+            text="All Models Progress:",
+            font=(Config.FONT_FAMILY, 11, "bold"),
+            bg=Theme.SURFACE,
+            fg=Theme.TEXT_PRIMARY,
+            anchor=tk.W
+        ).pack(anchor=tk.W, pady=(0, 5))
+
+        self.progress_bar = ttk.Progressbar(
+            self.progress_frame,
+            orient=tk.HORIZONTAL,
+            length=400,
+            mode='determinate',
+            maximum=100,
+            value=0
+        )
+        self.progress_bar.pack(fill=tk.X, pady=(0, 5))
+
+        self.progress_label = tk.Label(
+            self.progress_frame,
+            text="0 / 0 models completed",
+            font=(Config.FONT_FAMILY, 10),
+            bg=Theme.SURFACE,
+            fg=Theme.TEXT_SECONDARY
+        )
+        self.progress_label.pack(anchor=tk.W)
+
         # Colorbar frame - remove fixed height to allow adaptive sizing
         colorbar_frame = tk.Frame(results, bg=Theme.SURFACE)
         colorbar_frame.pack(fill=tk.X, padx=12, pady=(0, 8))
@@ -1660,15 +1819,12 @@ class BreastCancerClassifierGUI:
             return None, None
 
     def predict_all_models(self):
-        """Run predictions on all available models and aggregate results"""
+        """Run predictions on all available models and aggregate results using threading"""
         if not self.current_image_path:
             show_message(self.root, "warning", "No Image", "Load an image first")
             return
 
         self.status.config(text="Running predictions on all models...")
-
-        import time
-        start_time = time.time()
 
         try:
             # Get all model paths (excluding "All models")
@@ -1681,6 +1837,30 @@ class BreastCancerClassifierGUI:
                 show_message(self.root, "error", "No Models", "No valid model files found")
                 return
 
+            # Create progress queue and window
+            self.progress_queue = queue.Queue()
+            self.progress_window = ProgressWindow(self.root, "All Models Prediction Progress", len(all_models))
+
+            # Start checking for progress updates
+            self.check_progress_queue()
+
+            # Start prediction thread
+            thread = threading.Thread(target=self.run_all_predictions_threaded, args=(all_models,))
+            thread.daemon = True
+            thread.start()
+
+        except Exception as e:
+            show_message(self.root, "error", "Error", f"All models prediction failed:\n{str(e)}")
+            import traceback
+            traceback.print_exc()
+            self.status.config(text="All models prediction failed")
+
+    def run_all_predictions_threaded(self, all_models):
+        """Run predictions in a separate thread"""
+        import time
+        start_time = time.time()
+
+        try:
             # Prepare image path
             if self.current_image != self.original_image:
                 img_path = "/tmp/cropped.png"
@@ -1691,8 +1871,9 @@ class BreastCancerClassifierGUI:
             # Run predictions on all models
             all_results = []
             failed_models = []
+            completed_count = 0
 
-            for display_name, model_path in all_models:
+            for i, (display_name, model_path) in enumerate(all_models):
                 try:
                     model_type = self.get_model_type_from_path(model_path)
 
@@ -1730,26 +1911,77 @@ class BreastCancerClassifierGUI:
                     failed_models.append(display_name)
                     continue
 
-            if not all_results:
-                show_message(self.root, "error", "All Models Failed", "No models were able to make predictions")
-                self.status.config(text="All predictions failed")
-                return
+                # Update progress after each successful model
+                completed_count += 1
+                self.progress_queue.put({
+                    'type': 'progress',
+                    'completed': completed_count,
+                    'total': len(all_models),
+                    'current_model': display_name
+                })
 
-            # Aggregate results using majority vote + confidence sorting
-            aggregated_result = self.aggregate_model_results(all_results)
-
+            # Send completion message with results
             processing_time = time.time() - start_time
-
-            # Display aggregated results
-            self.display_all_models_results(aggregated_result, all_results, failed_models, processing_time)
-
-            self.status.config(text=f"All models prediction complete: {aggregated_result['final_prediction']}")
+            self.progress_queue.put({
+                'type': 'complete',
+                'all_results': all_results,
+                'failed_models': failed_models,
+                'processing_time': processing_time
+            })
 
         except Exception as e:
-            show_message(self.root, "error", "Error", f"All models prediction failed:\n{str(e)}")
             import traceback
             traceback.print_exc()
-            self.status.config(text="All models prediction failed")
+            self.progress_queue.put({
+                'type': 'error',
+                'error': str(e)
+            })
+
+    def check_progress_queue(self):
+        """Check for progress updates from the prediction thread"""
+        try:
+            while True:
+                msg = self.progress_queue.get_nowait()
+
+                if msg['type'] == 'progress':
+                    self.progress_window.update_progress(
+                        msg['completed'],
+                        msg['total'],
+                        msg['current_model']
+                    )
+                elif msg['type'] == 'complete':
+                    # Close progress window
+                    self.progress_window.close()
+
+                    all_results = msg['all_results']
+                    failed_models = msg['failed_models']
+                    processing_time = msg['processing_time']
+
+                    if not all_results:
+                        show_message(self.root, "error", "All Models Failed", "No models were able to make predictions")
+                        self.status.config(text="All predictions failed")
+                        return
+
+                    # Aggregate results using majority vote + confidence sorting
+                    aggregated_result = self.aggregate_model_results(all_results)
+
+                    # Display aggregated results
+                    self.display_all_models_results(aggregated_result, all_results, failed_models, processing_time)
+
+                    self.status.config(text=f"All models prediction complete: {aggregated_result['final_prediction']}")
+                    return
+                elif msg['type'] == 'error':
+                    self.progress_window.close()
+                    show_message(self.root, "error", "Error", f"All models prediction failed:\n{msg['error']}")
+                    self.status.config(text="All models prediction failed")
+                    return
+
+        except queue.Empty:
+            pass
+
+        # Continue checking if window still exists
+        if hasattr(self, 'progress_window') and self.progress_window.window.winfo_exists():
+            self.root.after(100, self.check_progress_queue)
 
     def aggregate_model_results(self, all_results):
         """Aggregate results from all models using majority vote and confidence sorting"""
