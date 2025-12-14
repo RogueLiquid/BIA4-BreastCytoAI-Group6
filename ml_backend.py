@@ -57,7 +57,7 @@ class ResNet50RadiomicsFusion(nn.Module):
     def __init__(self, radiomics_dim=39, resnet_feature_dim=256, radiomics_reduced_dim=64, 
                  fusion_dim=128, num_classes=2, dropout=0.3):
         super().__init__()
-        resnet = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
+        resnet = models.resnet50(weights=None)
         self.resnet_backbone = nn.Sequential(*list(resnet.children())[:-1])
         self.resnet_reducer = nn.Sequential(
             nn.Linear(2048, resnet_feature_dim),
@@ -99,7 +99,7 @@ class ResNet18Empty(nn.Module):
 class ResNet18_PT_FT(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
-        base = models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1)
+        base = models.resnet18(weights=None)
         base.fc = nn.Linear(base.fc.in_features, num_classes)
         self.model = base
     def forward(self, x):
@@ -108,7 +108,7 @@ class ResNet18_PT_FT(nn.Module):
 class ResNet18Freeze(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
-        base = models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1)
+        base = models.resnet18(weights=None)
         for param in base.parameters():
             param.requires_grad = False
         base.fc = nn.Linear(base.fc.in_features, num_classes)
@@ -120,7 +120,7 @@ class ResNet18Freeze(nn.Module):
 class ResNet50_PT_FT(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
-        base = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
+        base = models.resnet50(weights=None)
         base.fc = nn.Linear(base.fc.in_features, num_classes)
         self.model = base
     def forward(self, x):
@@ -129,7 +129,7 @@ class ResNet50_PT_FT(nn.Module):
 class ResNet50Freeze(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
-        base = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
+        base = models.resnet50(weights=None)
         for param in base.parameters():
             param.requires_grad = False
         base.fc = nn.Linear(base.fc.in_features, num_classes)
@@ -151,7 +151,7 @@ class ResNet50Empty(nn.Module):
 class ResNet101_PT_FT(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
-        base = models.resnet101(weights=models.ResNet101_Weights.IMAGENET1K_V1)
+        base = models.resnet101(weights=None)
         base.fc = nn.Linear(base.fc.in_features, num_classes)
         self.model = base
     def forward(self, x):
@@ -160,7 +160,7 @@ class ResNet101_PT_FT(nn.Module):
 class DenseNet121_PT_FT(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
-        base = models.densenet121(weights=models.DenseNet121_Weights.IMAGENET1K_V1)
+        base = models.densenet121(weights=None)
         base.classifier = nn.Linear(base.classifier.in_features, num_classes)
         self.model = base
     def forward(self, x):
@@ -169,7 +169,7 @@ class DenseNet121_PT_FT(nn.Module):
 class DenseNet201_PT_FT(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
-        base = models.densenet201(weights=models.DenseNet201_Weights.IMAGENET1K_V1)
+        base = models.densenet201(weights=None)
         base.classifier = nn.Linear(base.classifier.in_features, num_classes)
         self.model = base
     def forward(self, x):
@@ -178,7 +178,7 @@ class DenseNet201_PT_FT(nn.Module):
 class EfficientNetB0_PT_FT(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
-        base = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.IMAGENET1K_V1)
+        base = models.efficientnet_b0(weights=None)
         base.classifier[1] = nn.Linear(base.classifier[1].in_features, num_classes)
         self.model = base
     def forward(self, x):
@@ -188,7 +188,7 @@ class MobileNetV2_PT_FT(nn.Module):
     """Fine-tuned MobileNetV2 with pretrained weights."""
     def __init__(self, num_classes=2):
         super().__init__()
-        base = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.IMAGENET1K_V1)
+        base = models.mobilenet_v2(weights=None)
         base.classifier[1] = nn.Linear(base.classifier[1].in_features, num_classes)
         self.model = base
 
@@ -216,7 +216,7 @@ class SimpleCNN(nn.Module):
 class VGG16(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
-        base = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_V1)
+        base = models.vgg16(weights=None)
         base.classifier[6] = nn.Linear(base.classifier[6].in_features, num_classes)
         self.model = base
 
@@ -226,7 +226,7 @@ class VGG16(nn.Module):
 class AlexNet(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
-        base = models.alexnet(weights=models.AlexNet_Weights.IMAGENET1K_V1)
+        base = models.alexnet(weights=None)
         base.classifier[6] = nn.Linear(base.classifier[6].in_features, num_classes)
         self.model = base
 
@@ -734,7 +734,7 @@ class DenseNet121SIFTFusion(nn.Module):
     """融合 DenseNet121 像素特征和 SIFT+BoF 特征的模型 - based on sift concat.ipynb"""
     def __init__(self, num_classes=2):
         super().__init__()
-        densenet = models.densenet121(weights=models.DenseNet121_Weights.IMAGENET1K_V1)
+        densenet = models.densenet121(weights=None)
         # Use the same architecture as in the notebook
         self.densenet_backbone = nn.Sequential(
             densenet.features,
@@ -760,7 +760,7 @@ class ResNet50SIFTFusion(nn.Module):
     """融合 ResNet50 像素特征和 SIFT+BoF 特征的模型"""
     def __init__(self, num_classes=2):
         super().__init__()
-        resnet = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
+        resnet = models.resnet50(weights=None)
         self.resnet_backbone = nn.Sequential(*list(resnet.children())[:-1])
         self.classifier = HybridClassifier(input_dim=500 + 2048, num_classes=num_classes)  # 500 SIFT + 2048 ResNet
 
