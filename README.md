@@ -216,14 +216,14 @@ conda env remove -n breastcytoai
 ### Common Issues
 
 1. **Model Loading Failure**
-   - Ensure .pth files are in correct locations
+   - Ensure .pth files are in correct locations: Make sure each .pth file is in the corresponding naming folder (such as Pixel_ResNet50), as our tool construct models by reconizing the folder name.
    - Check file permissions
 
 2. **CUDA Errors**
    - Install CUDA version of PyTorch: `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118`
 
 3. **Memory Insufficient**
-   - Use smaller models or reduce batch size
+   - Use smaller models (VGG and Vit are larger)
    - Close unnecessary applications
 
 4. **Executable Build Failure**
@@ -246,5 +246,6 @@ Issues and improvement suggestions are welcome!
 
 ## Version History
 
+- **v3.0**: Added All models mode
 - **v2.0**: Added Occlusion visualization, improved interface, enhanced clinical reports
 - **v1.0**: Basic functionality implementation
